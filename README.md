@@ -38,11 +38,11 @@ Then enable Pages:
 1. Open the repo → **Settings** → **Pages**
 2. Source: **Deploy from a branch**
 3. Branch: `main`, folder: `/ (root)` → Save
-4. Wait ~1 min. Site lives at: `https://hnikhi.github.io/pwa-hello/`
+4. Wait ~1 min. Site lives at: `https://clouddevops.github.io/pwa-hello/`
 
 ## Install on iPad
 
-1. Open `https://hnikhi.github.io/pwa-hello/` in **Safari** (must be Safari)
+1. Open `https://clouddevops.github.io/pwa-hello/` in **Safari** (must be Safari)
 2. Tap **Share** → **Add to Home Screen** → **Add**
 3. Launch from the home-screen icon — it opens fullscreen, no Safari chrome
 
