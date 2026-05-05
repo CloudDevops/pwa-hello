@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Hello PWA</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hello PWA" />
+  <meta name="theme-color" content="#1f2937" />
+
+  <style>
+    :root { color-scheme: dark; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: #1f2937;
+      color: #f9fafb;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      text-align: center;
+    }
+    h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin: 0; }
+    .clock { font-size: clamp(1.25rem, 4vw, 2rem); color: #9ca3af; font-variant-numeric: tabular-nums; }
+    button {
+      font-size: 1.25rem;
+      padding: 0.9rem 1.6rem;
+      border-radius: 999px;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active { transform: scale(0.97); }
+    .count { font-size: 1.1rem; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <h1>Hello, iPad! 👋</h1>
+  <div class="clock" id="clock">--:--:--</div>
+  <button id="tap">Tap me</button>
+  <div class="count" id="count">Taps: 0</div>
+
+  <script>
+    const clock = document.getElementById("clock");
+    const tick = () => {
+      const d = new Date();
+      clock.textContent = d.toLocaleTimeString();
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    let n = 0;
+    document.getElementById("tap").addEventListener("click", () => {
+      n += 1;
+      document.getElementById("count").textContent = `Taps: ${n}`;
+    });
+  </script>
+</body>
+</html>
