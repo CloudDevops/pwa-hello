@@ -49,3 +49,17 @@ Then enable Pages:
 ## Iterating
 
 Edit files locally → `git commit && git push` → GitHub Pages re-deploys in ~30-60s. On the iPad, force-quit the installed app and re-launch to pick up changes (or pull-to-refresh inside it).
+
+---
+
+## Also in this repo
+
+This repo doubles as the working space for the NikTech AI small-business services line:
+
+- **[`strategy/`](strategy/)** — the plan: assessment, offers and pricing, go-to-market, the
+  identity/privacy sequencing, ops and legal, and a 90-day plan. Start at
+  [`strategy/00-assessment.md`](strategy/00-assessment.md), act from
+  [`strategy/06-90-day-plan.md`](strategy/06-90-day-plan.md).
+- **[`site/`](site/)** — drop-in `/smb/` and `/ai-front-desk/` pages for niktechai.com, matching the
+  live site's design system. See [`site/README.md`](site/README.md) for the deploy steps and the
+  demo-number blocker.
