@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Keeps jarvisd running across logins and restarts.
+     Install:
+       sed -i '' "s|__PATH__|$HOME/path/to/pwa-hello/jarvis|" com.jarvis.dashboard.plist
+       cp com.jarvis.dashboard.plist ~/Library/LaunchAgents/
+       launchctl load -w ~/Library/LaunchAgents/com.jarvis.dashboard.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jarvis.dashboard</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>__PATH__/jarvisd.py</string>
+    <string>--host</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>8787</string>
+  </array>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/jarvisd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/jarvisd.err</string>
+</dict>
+</plist>

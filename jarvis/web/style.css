@@ -1,0 +1,385 @@
+/* Jarvis glass dashboard.
+   Accent RGBs mirror panels.py ACCENTS -- change both or neither. */
+
+:root {
+  color-scheme: dark;
+
+  --bg: #05080d;
+  --panel: rgba(10, 20, 31, 0.52);
+  --panel-solid: #0a141f;
+  --hairline: rgba(148, 163, 184, 0.14);
+
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --label: #94a3b8;
+
+  --cyan: 34 211 238;
+  --amber: 251 191 36;
+  --green: 52 211 153;
+  --red: 248 113 113;
+  --violet: 167 139 250;
+
+  --accent: var(--cyan);
+  --gap: 14px;
+  --radius: 12px;
+
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;              /* a dashboard you scroll is a page */
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient field: two slow glows + a scanline wash, all behind the glass. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(60vw 60vw at 18% 8%, rgb(var(--cyan) / 0.10), transparent 60%),
+    radial-gradient(50vw 50vw at 88% 92%, rgb(var(--violet) / 0.08), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(148 163 184 / 0.028) 0px,
+    rgb(148 163 184 / 0.028) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+#shell {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: calc(var(--gap) + env(safe-area-inset-top)) calc(var(--gap) + env(safe-area-inset-right))
+           calc(var(--gap) + env(safe-area-inset-bottom)) calc(var(--gap) + env(safe-area-inset-left));
+}
+
+/* ------------------------------------------------------------- header -- */
+
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex: 0 0 auto;
+  padding: 0 4px;
+}
+.brand {
+  font-size: 13px;
+  letter-spacing: 0.42em;
+  color: rgb(var(--cyan));
+  text-shadow: 0 0 18px rgb(var(--cyan) / 0.5);
+}
+.clock {
+  font-size: 13px;
+  color: var(--label);
+  letter-spacing: 0.08em;
+}
+header .spacer { flex: 1; }
+
+.conn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.conn .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.conn.live .dot {
+  background: rgb(var(--green));
+  box-shadow: 0 0 10px rgb(var(--green) / 0.9);
+}
+.conn.live { color: rgb(var(--green) / 0.85); }
+.conn.down .dot { background: rgb(var(--red)); box-shadow: 0 0 10px rgb(var(--red) / 0.9); }
+.conn.down { color: rgb(var(--red) / 0.85); }
+
+/* --------------------------------------------------------------- grid -- */
+
+#grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 30%);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "status status"
+    "main   side"
+    "rail   rail";
+}
+[data-zone="status"] { grid-area: status; }
+[data-zone="main"]   { grid-area: main; }
+[data-zone="side"]   { grid-area: side; }
+[data-zone="rail"]   { grid-area: rail; }
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.zone > .panel { flex: 1 1 auto; }
+
+/* Empty zones collapse rather than leaving a hole in the layout. */
+.zone:empty { display: none; }
+
+@media (max-width: 900px) {
+  #grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "status" "main" "side" "rail";
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+}
+
+/* -------------------------------------------------------------- panel -- */
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgb(var(--accent) / 0.18);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.4),
+    0 18px 50px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.05);
+  animation: panel-in 0.34s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Corner brackets -- the detail that reads as "HUD" more than anything else. */
+.panel::before,
+.panel::after {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgb(var(--accent) / 0.55);
+  pointer-events: none;
+}
+.panel::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; border-radius: var(--radius) 0 0 0; }
+.panel::after  { bottom: -1px; right: -1px; border-left: 0; border-top: 0; border-radius: 0 0 var(--radius) 0; }
+
+.panel > .head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+.panel .title {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(var(--accent));
+}
+.panel .sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.panel > .body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;              /* truncate, then say how much was hidden */
+  padding: 8px 14px 10px;
+  font-size: 14px;
+  line-height: 1.72;
+}
+.panel > .foot {
+  flex: 0 0 auto;
+  padding: 6px 14px 9px;
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--hairline);
+}
+.more { color: rgb(var(--accent) / 0.8); }
+
+/* Working state: the panel visibly breathes so latency reads as activity. */
+.panel.working { border-color: rgb(var(--amber) / 0.4); }
+.panel.working .title { color: rgb(var(--amber)); }
+.panel.working .sub::after {
+  content: "";
+  display: inline-block;
+  width: 5px; height: 5px;
+  margin-left: 7px;
+  border-radius: 50%;
+  background: rgb(var(--amber));
+  animation: pulse 1.1s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+.panel.stale { opacity: 0.72; }
+.panel.error { border-color: rgb(var(--red) / 0.45); }
+.panel.error .title { color: rgb(var(--red)); }
+
+/* --------------------------------------------------------------- rows -- */
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 1px 0 1px 11px;
+  animation: row-in 0.3s both cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes row-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+.row .lead {
+  flex: 0 0 auto;
+  color: var(--label);
+  letter-spacing: 0.02em;
+}
+.row .mid {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row .tail {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.row.s-now .lead,
+.row.s-now .mid { color: rgb(var(--cyan)); }
+.row.s-now .lead { text-shadow: 0 0 12px rgb(var(--cyan) / 0.55); }
+.row.s-warn .mid, .row.s-warn .lead { color: rgb(var(--amber)); }
+.row.s-crit .mid, .row.s-crit .lead { color: rgb(var(--red)); }
+.row.s-muted .lead,
+.row.s-muted .mid,
+.row.s-muted .tail { color: var(--muted); }
+
+/* Left tick marks the live row, in a gutter every row already reserves. */
+.row.s-now::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: rgb(var(--cyan));
+  box-shadow: 0 0 8px rgb(var(--cyan) / 0.9);
+}
+
+/* ------------------------------------------------------- metrics/table -- */
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 44px;
+}
+.metric { display: flex; flex-direction: column; gap: 1px; min-width: 92px; }
+.metric .row2 { display: flex; align-items: baseline; gap: 7px; }
+.metric .k {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.metric .v { font-size: 21px; line-height: 1.15; color: var(--text); }
+.metric .d { font-size: 11px; color: rgb(var(--green)); }
+.metric .d[data-neg="1"] { color: rgb(var(--red)); }
+.metric.s-warn .v { color: rgb(var(--amber)); }
+.metric.s-crit .v { color: rgb(var(--red)); }
+
+table { width: 100%; border-collapse: collapse; table-layout: auto; }
+th {
+  text-align: left;
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 12px 5px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+td {
+  padding: 2px 18px 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 34ch;               /* clamp long cells, let short ones stay narrow */
+}
+td:last-child, th:last-child { padding-right: 0; }
+
+.text p { margin: 0 0 0.7em; }
+.text p:last-child { margin-bottom: 0; }
+
+.empty { color: var(--muted); font-style: italic; }
+
+/* Standby: what the screen shows when nothing has been pushed yet. */
+#standby {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  text-align: center;
+  pointer-events: none;
+}
+#standby .ring {
+  justify-self: center;
+  width: 74px; height: 74px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--cyan) / 0.35);
+  border-top-color: rgb(var(--cyan));
+  animation: spin 3.4s linear infinite;
+  box-shadow: 0 0 34px rgb(var(--cyan) / 0.22), inset 0 0 26px rgb(var(--cyan) / 0.1);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#standby .msg {
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgb(var(--cyan) / 0.65);
+}
+#shell.has-panels #standby { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

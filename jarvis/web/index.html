@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>JARVIS</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="JARVIS" />
+  <meta name="theme-color" content="#05080d" />
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="shell">
+    <header>
+      <span class="brand">JARVIS</span>
+      <span class="clock" id="clock">--:--:--</span>
+      <span class="spacer"></span>
+      <span class="conn" id="conn"><span class="dot"></span><span class="label">connecting</span></span>
+    </header>
+
+    <div id="grid"></div>
+
+    <div id="standby">
+      <div class="ring"></div>
+      <div class="msg">standby</div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
