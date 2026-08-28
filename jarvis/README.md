@@ -28,10 +28,12 @@ Four fixed zones — `status`, `main`, `side`, `rail` — described in
 Requires nothing but the system `python3`.
 
 ```sh
-./jarvis serve            # daemon on http://127.0.0.1:8787
+./jarvis up               # start the daemon if needed, then open the dashboard
 ./jarvis demo             # fill every zone with sample panels
-open http://127.0.0.1:8787
 ```
+
+`jarvis serve` runs the daemon in the foreground if you would rather watch it.
+Resuming this project in a new session? Start with [HANDOFF.md](HANDOFF.md).
 
 For it to survive logout and reboot, install the launchd agent in
 [`launchd/`](launchd/com.jarvis.dashboard.plist).
