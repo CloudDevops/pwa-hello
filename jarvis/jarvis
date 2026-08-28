@@ -1,0 +1,320 @@
+#!/usr/bin/env python3
+"""jarvis -- push panels to the dashboard, or render them straight to the terminal.
+
+This is the surface the model actually types against, so every command is
+shaped to be cheap to write:
+
+    jarvis push main agenda '[["09:00","Standup","30m"]]' -t agenda
+    jarvis work main "querying calendar…"
+    jarvis show list '["one","two"]' -t queue     # terminal only, no daemon
+"""
+
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import panels  # noqa: E402
+import jarvisd  # noqa: E402
+
+HOST = os.environ.get("JARVIS_HOST", "127.0.0.1")
+PORT = int(os.environ.get("JARVIS_PORT", 8787))
+BASE = "http://%s:%d" % ("127.0.0.1" if HOST == "0.0.0.0" else HOST, PORT)
+
+
+def die(msg, code=1):
+    sys.stderr.write("jarvis: %s\n" % msg)
+    raise SystemExit(code)
+
+
+def api(path, payload=None, method="POST"):
+    """Call the daemon. Returns None when it is not reachable."""
+    url = BASE + path
+    data = None
+    if payload is not None:
+        data = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    req = urllib.request.Request(
+        url, data=data, method=method, headers={"Content-Type": "application/json"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            return json.loads(resp.read().decode("utf-8") or "{}")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")
+        try:
+            detail = json.loads(detail).get("error", detail)
+        except ValueError:
+            pass
+        die("daemon rejected the panel: %s" % detail)
+    except (urllib.error.URLError, OSError, TimeoutError):
+        return None
+
+
+def read_items(raw):
+    """Items come from an argument, or from stdin when it is '-' or absent."""
+    if raw is None or raw == "-":
+        if sys.stdin.isatty():
+            return []
+        raw = sys.stdin.read().strip()
+    if not raw:
+        return []
+    try:
+        return json.loads(raw)
+    except ValueError as exc:
+        die("items must be JSON: %s" % exc)
+
+
+def build_panel(args):
+    panel = {
+        "type": args.type,
+        "items": read_items(args.items),
+        "title": args.title or "",
+        "sub": args.sub or "",
+        "note": args.note or "",
+        "accent": args.accent,
+        "state": args.state,
+    }
+    try:
+        return panels.normalize_panel(panel)
+    except ValueError as exc:
+        die(str(exc))
+
+
+def offline_write(mutate):
+    """Daemon down: still update the state file so the next `serve` picks it up."""
+    state = panels.load(jarvisd.STATE_PATH)
+    mutate(state)
+    state["ts"] = panels.now()
+    panels.save(jarvisd.STATE_PATH, state)
+    sys.stderr.write("jarvis: daemon not running -- wrote state file only\n")
+
+
+# ------------------------------------------------------------- commands --
+
+def cmd_push(args):
+    panel = build_panel(args)
+    focus = getattr(args, "focus", False)
+    if api("/api/push", {"zone": args.zone, "panel": panel, "focus": focus}) is None:
+        if args.zone not in panels.ZONES:
+            die("unknown zone %r" % args.zone)
+
+        def mutate(s):
+            if focus:
+                s["zones"] = {z: None for z in panels.ZONES}
+            s["zones"][args.zone] = panel
+        offline_write(mutate)
+
+
+def cmd_focus(args):
+    """Answer one question: clear the board and show a single panel."""
+    args.zone = "main"
+    args.focus = True
+    cmd_push(args)
+
+
+def cmd_set(args):
+    try:
+        panel = panels.normalize_panel(json.loads(args.panel))
+    except ValueError as exc:
+        die("bad panel: %s" % exc)
+    if api("/api/push", {"zone": args.zone, "panel": panel}) is None:
+        offline_write(lambda s: s["zones"].__setitem__(args.zone, panel))
+
+
+def cmd_work(args):
+    """Show activity while a slow call is in flight -- latency reads as work."""
+    panel = {
+        "type": "text",
+        "title": args.title or "working",
+        "sub": args.message,
+        "state": "working",
+        "items": [],
+    }
+    if api("/api/push", {"zone": args.zone, "panel": panel}) is None:
+        offline_write(lambda s: s["zones"].__setitem__(args.zone, panels.normalize_panel(panel)))
+
+
+def cmd_clear(args):
+    if api("/api/clear", {"zone": args.zone}) is None:
+        def mutate(s):
+            if args.zone:
+                s["zones"][args.zone] = None
+            else:
+                s["zones"] = {z: None for z in panels.ZONES}
+        offline_write(mutate)
+
+
+def cmd_show(args):
+    """Render one panel to stdout without involving the daemon at all."""
+    panel = build_panel(args)
+    print(panels.render_panel(panel, width=args.width, color=not args.no_color))
+
+
+def cmd_render(args):
+    state = api("/api/state", method="GET")
+    if state is None:
+        state = panels.load(jarvisd.STATE_PATH)
+    print(panels.render_state(state, width=args.width, color=not args.no_color))
+
+
+def cmd_status(args):
+    health = api("/api/health", method="GET")
+    if health is None:
+        print("daemon: down    (state: %s)" % jarvisd.STATE_PATH)
+        raise SystemExit(1)
+    print("daemon: up  pid %s  %s" % (health.get("pid"), BASE))
+    state = api("/api/state", method="GET") or {}
+    for z in panels.ZONES:
+        p = (state.get("zones") or {}).get(z)
+        print("  %-7s %s" % (z, ("%s/%s" % (p["type"], p["title"] or "-")) if p else "-"))
+
+
+def cmd_serve(args):
+    jarvisd.serve(args.host, args.port)
+
+
+def cmd_up(args):
+    """Start the daemon if it is not already running, then open the dashboard."""
+    import subprocess
+
+    if api("/api/health", method="GET") is None:
+        log = os.path.expanduser("~/.jarvis/jarvisd.log")
+        os.makedirs(os.path.dirname(log), exist_ok=True)
+        daemon = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jarvisd.py")
+        with open(log, "a") as fh:
+            subprocess.Popen(
+                [sys.executable, daemon, "--host", args.host, "--port", str(args.port)],
+                stdout=fh, stderr=fh,
+                start_new_session=True,   # survives this shell exiting
+            )
+        for _ in range(40):
+            time.sleep(0.25)
+            if api("/api/health", method="GET") is not None:
+                break
+        else:
+            die("daemon did not come up -- see %s" % log)
+        print("started daemon (log: %s)" % log)
+    else:
+        print("daemon already running")
+
+    url = BASE
+    if not args.no_open:
+        opener = "open" if sys.platform == "darwin" else "xdg-open"
+        try:
+            subprocess.Popen([opener, url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except OSError:
+            pass  # headless or no opener: the URL below is enough
+    print(url)
+
+
+def cmd_demo(args):
+    demo = {
+        "status": {
+            "type": "metrics", "title": "system", "accent": "green",
+            "items": [["CPU", "12%"], ["MEM", "41%"], ["DISK", "68%", "+2"], ["NET", "1.2MB/s"]],
+        },
+        "main": {
+            "type": "agenda", "title": "agenda", "sub": "as of 3m ago",
+            "items": [
+                ["09:00", "Standup", "30m", "muted"],
+                ["11:30", "Design review — Jarvis dashboard", "45m", "now"],
+                ["14:00", "1:1 Dana", "45m"],
+                ["16:30", "Deploy window", "1h", "warn"],
+            ],
+        },
+        "side": {
+            "type": "mail", "title": "sent", "accent": "violet",
+            "items": [
+                ["dana@acme.co", "Re: rollout plan", "2m"],
+                ["ops@acme.co", "Postmortem draft", "1h", "muted"],
+            ],
+        },
+        "rail": {
+            "type": "log", "title": "activity", "accent": "amber",
+            "items": [["09:41", "calendar synced"], ["09:39", "inbox refreshed", "muted"]],
+        },
+    }
+    for zone, panel in demo.items():
+        if api("/api/push", {"zone": zone, "panel": panels.normalize_panel(panel)}) is None:
+            die("daemon not running -- start it with `jarvis serve`")
+    print("pushed demo panels to %s" % BASE)
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="jarvis", description=__doc__.split("\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    def panel_args(p, with_zone=True):
+        if with_zone:
+            p.add_argument("zone", choices=panels.ZONES)
+        p.add_argument("type", choices=panels.PANEL_TYPES)
+        p.add_argument("items", nargs="?", help="JSON array of rows, or - for stdin")
+        p.add_argument("-t", "--title", default="")
+        p.add_argument("-s", "--sub", default="")
+        p.add_argument("-n", "--note", default="")
+        p.add_argument("-a", "--accent", default="cyan", choices=sorted(panels.ACCENTS))
+        p.add_argument("--state", default="ok", choices=["ok", "working", "stale", "error"])
+
+    p = sub.add_parser("push", help="push a panel to a zone")
+    panel_args(p)
+    p.add_argument("--focus", action="store_true",
+                   help="clear every other zone in the same frame")
+    p.set_defaults(func=cmd_push)
+
+    p = sub.add_parser("focus", help="show a single panel and clear the rest")
+    panel_args(p, with_zone=False)
+    p.set_defaults(func=cmd_focus)
+
+    p = sub.add_parser("show", help="render a panel to the terminal only")
+    panel_args(p, with_zone=False)
+    p.add_argument("--width", type=int)
+    p.add_argument("--no-color", action="store_true")
+    p.set_defaults(func=cmd_show)
+
+    p = sub.add_parser("set", help="push a full panel object as JSON")
+    p.add_argument("zone", choices=panels.ZONES)
+    p.add_argument("panel")
+    p.set_defaults(func=cmd_set)
+
+    p = sub.add_parser("work", help="mark a zone busy while a slow call runs")
+    p.add_argument("zone", choices=panels.ZONES)
+    p.add_argument("message")
+    p.add_argument("-t", "--title", default="")
+    p.set_defaults(func=cmd_work)
+
+    p = sub.add_parser("clear", help="clear one zone, or all of them")
+    p.add_argument("zone", nargs="?", choices=panels.ZONES)
+    p.set_defaults(func=cmd_clear)
+
+    p = sub.add_parser("render", help="render the whole dashboard to the terminal")
+    p.add_argument("--width", type=int)
+    p.add_argument("--no-color", action="store_true")
+    p.set_defaults(func=cmd_render)
+
+    p = sub.add_parser("status", help="is the daemon up, and what is on screen")
+    p.set_defaults(func=cmd_status)
+
+    p = sub.add_parser("serve", help="run the dashboard daemon")
+    p.add_argument("--host", default=HOST)
+    p.add_argument("--port", type=int, default=PORT)
+    p.set_defaults(func=cmd_serve)
+
+    p = sub.add_parser("up", help="start the daemon if needed and open the dashboard")
+    p.add_argument("--host", default=HOST)
+    p.add_argument("--port", type=int, default=PORT)
+    p.add_argument("--no-open", action="store_true", help="do not launch a browser")
+    p.set_defaults(func=cmd_up)
+
+    p = sub.add_parser("demo", help="fill every zone with sample panels")
+    p.set_defaults(func=cmd_demo)
+
+    args = ap.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()

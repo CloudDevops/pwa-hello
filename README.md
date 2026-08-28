@@ -11,6 +11,13 @@ Minimal "Hello World" Progressive Web App, designed to be deployed to GitHub Pag
 
 All asset paths are relative (`./...`), so it works at any GitHub Pages subpath without changes.
 
+## Jarvis dashboard
+
+`jarvis/` holds a local HUD — a translucent dashboard the model updates by
+pushing data rather than markup, with a matching ANSI renderer for the
+terminal. It runs off the system `python3` with no dependencies. See
+[jarvis/README.md](jarvis/README.md).
+
 ## Test locally
 
 ```sh
