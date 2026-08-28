@@ -151,6 +151,13 @@ header .spacer { flex: 1; }
 /* Empty zones collapse rather than leaving a hole in the layout. */
 .zone:empty { display: none; }
 
+/* Reactive mode: one answer on screen, using the full width. */
+#grid.solo {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "status" "main" "rail";
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
 @media (max-width: 900px) {
   #grid {
     grid-template-columns: minmax(0, 1fr);

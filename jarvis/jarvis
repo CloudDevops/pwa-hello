@@ -96,10 +96,23 @@ def offline_write(mutate):
 
 def cmd_push(args):
     panel = build_panel(args)
-    if api("/api/push", {"zone": args.zone, "panel": panel}) is None:
+    focus = getattr(args, "focus", False)
+    if api("/api/push", {"zone": args.zone, "panel": panel, "focus": focus}) is None:
         if args.zone not in panels.ZONES:
             die("unknown zone %r" % args.zone)
-        offline_write(lambda s: s["zones"].__setitem__(args.zone, panel))
+
+        def mutate(s):
+            if focus:
+                s["zones"] = {z: None for z in panels.ZONES}
+            s["zones"][args.zone] = panel
+        offline_write(mutate)
+
+
+def cmd_focus(args):
+    """Answer one question: clear the board and show a single panel."""
+    args.zone = "main"
+    args.focus = True
+    cmd_push(args)
 
 
 def cmd_set(args):
@@ -213,7 +226,13 @@ def main():
 
     p = sub.add_parser("push", help="push a panel to a zone")
     panel_args(p)
+    p.add_argument("--focus", action="store_true",
+                   help="clear every other zone in the same frame")
     p.set_defaults(func=cmd_push)
+
+    p = sub.add_parser("focus", help="show a single panel and clear the rest")
+    panel_args(p, with_zone=False)
+    p.set_defaults(func=cmd_focus)
 
     p = sub.add_parser("show", help="render a panel to the terminal only")
     panel_args(p, with_zone=False)

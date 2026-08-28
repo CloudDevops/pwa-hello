@@ -176,6 +176,8 @@ function render(state) {
   const zones = (state && state.zones) || {};
   for (const z of ZONES) renderZone(z, zones[z] || null);
   shell.classList.toggle("has-panels", ZONES.some((z) => zones[z]));
+  // With nothing in the side column, main should span the whole width.
+  grid.classList.toggle("solo", !zones.side);
 }
 
 /* ------------------------------------------------------------ transport -- */

@@ -84,9 +84,24 @@ launchd/      keep the daemon alive across reboots
 `panels.py` and `web/app.js` implement the same schema twice. When you add a
 panel type, change both — SCHEMA.md lists the three places to touch.
 
+## Reactive, not ambient
+
+The dashboard is meant to answer a question, not to sit there full of widgets.
+`jarvis focus` clears every zone and shows a single panel in one frame, so
+asking for your calendar replaces whatever was there rather than adding to it:
+
+```sh
+jarvis focus agenda '[["15:00","Toddler pickup","15m"]]' -t today
+```
+
+The data feed is Claude itself — it already holds the calendar and mail
+connectors, so a request goes straight from connector to panel with the model
+curating in between. That curation is the feature: real calendar data is full
+of recurring habit blocks that should never reach the screen. See
+[RECIPES.md](RECIPES.md).
+
 ## Not built yet
 
-Warm-cache fetchers on a launchd timer, and the Mac MCP bridge
-(`dashboard_push` / `notify`) that lets voice on the phone drive this surface.
-The fetchers should be plain scripts hitting the APIs directly — keeping the
-model out of the polling loop is what makes a cached answer feel instant.
+The Mac MCP bridge (`dashboard_push`), which is what lets voice from the phone
+reach this surface. Local Claude Code needs no bridge — it has a shell, so it
+calls `jarvis` directly.

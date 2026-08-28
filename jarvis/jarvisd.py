@@ -66,14 +66,17 @@ class Hub:
         for q in dead:
             self.clients.discard(q)
 
-    def push(self, zone, panel):
+    def push(self, zone, panel, focus=False):
+        """Put a panel in a zone. With focus=True every other zone is cleared
+        in the same commit, so the dashboard shows exactly one answer and the
+        swap is a single frame."""
         if zone not in panels.ZONES:
             raise ValueError(
                 "unknown zone %r (want one of: %s)" % (zone, ", ".join(panels.ZONES))
             )
         panel = panels.normalize_panel(panel)
         with self.lock:
-            state = json.loads(json.dumps(self.state))
+            state = json.loads(json.dumps(self.state)) if not focus else panels.empty_state()
             state["zones"][zone] = panel
             self._commit(state)
 
@@ -173,7 +176,11 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             if path == "/api/push":
-                HUB.push(body.get("zone", "main"), body.get("panel"))
+                HUB.push(
+                    body.get("zone", "main"),
+                    body.get("panel"),
+                    focus=bool(body.get("focus")),
+                )
             elif path == "/api/state":
                 HUB.replace(body)
             elif path == "/api/clear":
