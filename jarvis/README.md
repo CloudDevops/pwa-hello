@@ -102,8 +102,15 @@ curating in between. That curation is the feature: real calendar data is full
 of recurring habit blocks that should never reach the screen. See
 [RECIPES.md](RECIPES.md).
 
+## Voice
+
+Driven from local Claude Code by dictation. The project skill at
+`.claude/skills/jarvis/SKILL.md` fires on "pull up my calendar" and similar,
+runs the connector → curate → focus pipeline, and keeps the spoken reply to one
+sentence because the detail is already on the glass.
+
 ## Not built yet
 
-The Mac MCP bridge (`dashboard_push`), which is what lets voice from the phone
-reach this surface. Local Claude Code needs no bridge — it has a shell, so it
-calls `jarvis` directly.
+The Mac MCP bridge (`dashboard_push`), which is what would let Claude voice on
+the phone reach this surface. Local Claude Code needs no bridge — it has a
+shell, so it calls `jarvis` directly.

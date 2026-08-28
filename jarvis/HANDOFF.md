@@ -76,21 +76,28 @@ into rows:
 
 This is why the model belongs in the loop instead of a cron script.
 
-## The one open decision
+## Voice: decided
 
-How voice reaches the surface. Nick has not picked yet, and it changes whether
-there is any work left at all:
+**Local Claude Code voice, to start.** He dictates into a local session; the
+session shells out to `jarvis focus`. No transport to build — the shell is the
+bridge.
 
-- **Voice into local Claude Code** — nothing to build. Dictate "pull up my
-  calendar", the session shells out to `jarvis focus`. Works today.
-- **Claude voice on the phone** — that is the Claude app, not Claude Code, and
-  it reaches this Mac only through his `mac-mcp` server. That server currently
-  has no method that can draw anything, so it needs a `dashboard_push` (and
-  probably `notify`). Its source is **not in this repo** — ask him for the
-  path. A composite `brief()` that fans out to calendar/mail/home in one call
-  is the other thing worth adding there, since round trips dominate latency.
+What makes it work is the project skill at `.claude/skills/jarvis/SKILL.md`,
+which fires on "pull up my calendar" and similar (with or without a leading
+"Jarvis") and encodes the connector → curate → focus pipeline. Two things
+about it matter more than they look:
 
-Ask which one before building the bridge.
+- **The chat reply is spoken aloud.** So it is the headline, one sentence, and
+  the detail goes on the glass. Never read a list out loud — it is already on
+  screen. Long chat replies are the main way this gets annoying to use.
+- **`focus` is the default, not `push`.** He does not want an ambient board.
+
+Deferred, not cancelled: the `mac-mcp` bridge (`dashboard_push` / `notify`)
+for driving this from Claude voice on the phone. That is a different surface —
+the Claude app is not Claude Code and reaches this Mac only through mac-mcp,
+whose source is **not in this repo**. Ask him for the path when he wants it.
+A composite `brief()` fanning out to calendar/mail/home in one call is the
+other thing worth adding there, since round trips dominate latency.
 
 ## Facts you will want
 
@@ -121,8 +128,11 @@ Ask which one before building the bridge.
 
 1. `./jarvis up`, confirm the glass renders.
 2. Do one real calendar pull → `jarvis focus`. That is the whole product.
-3. Ask him which voice path he wants.
-4. Only then: the `mac-mcp` bridge, or ports to the iPad.
+3. Have him say a few requests out loud and watch whether the `jarvis` skill
+   fires. Dictation is messy — if it misses, widen the trigger phrasings in the
+   skill description rather than making him phrase things carefully.
+4. Only then: ports to the iPad, or the `mac-mcp` bridge when he wants phone
+   voice.
 
 Ports to other devices come after the Mac loop feels right — that was his
 stated order.
