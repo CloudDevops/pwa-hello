@@ -1,0 +1,55 @@
+name: Update congressional trades data
+
+# Pulls new STOCK Act periodic transaction reports from the House Clerk, the Senate eFD portal
+# and the White House disclosures page, parses them into data/*.json and commits the result.
+# GitHub Pages serves the repo root, so a commit here is what refreshes trades.html.
+on:
+  schedule:
+    - cron: "17 14 * * *" # daily 14:17 UTC (~10:17 ET), after the Clerk's morning index refresh
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Years to refresh (space separated). Default: current and previous year."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-trades
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pdftotext (poppler)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+
+      - name: Fetch and parse filings
+        run: |
+          if [ -n "${{ github.event.inputs.years }}" ]; then
+            python3 scripts/fetch_trades.py --years ${{ github.event.inputs.years }}
+          else
+            python3 scripts/fetch_trades.py
+          fi
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No data changes."
+            exit 0
+          fi
+          git commit -m "data: refresh congressional trades ($(date -u +%Y-%m-%d))"
+          git push

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Congress Trades</title>
+
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1f2937" />
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #1f2937; --panel: #111827; --line: #374151; --text: #f9fafb; --muted: #9ca3af;
+      --accent: #3b82f6; --buy: #22c55e; --sell: #ef4444; --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 48px; }
+    header.top { padding: 14px 0 6px; }
+    header.top .back { font-size: 0.9rem; color: var(--muted); }
+    header.top h1 { margin: 4px 0 2px; font-size: clamp(1.5rem, 4vw, 2.1rem); }
+    .meta { color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+    nav.tabs { display: flex; gap: 6px; margin: 12px 0; overflow-x: auto; }
+    nav.tabs button { flex: 0 0 auto; background: transparent; color: var(--muted); border: 1px solid var(--line);
+      border-radius: 999px; padding: 8px 14px; font-size: 0.95rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    nav.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .controls { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 10px; }
+    .controls input[type="search"] { width: 100%; font-size: 1rem; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { background: var(--bg); color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
+      padding: 6px 12px; font-size: 0.88rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .chip[aria-pressed="true"] { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; font-size: 0.9rem; color: var(--muted); }
+    select { font-size: 0.9rem; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+    button.link { background: none; border: none; color: var(--accent); font-size: 0.9rem; cursor: pointer; padding: 0; }
+    .stats { color: var(--muted); font-size: 0.85rem; margin: 12px 2px 8px; }
+    .cards { display: grid; gap: 10px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+    .card .l1 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .badge { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 6px; color: #0b1220; }
+    .badge.buy { background: var(--buy); } .badge.sell { background: var(--sell); color: #fff; } .badge.other { background: var(--muted); }
+    .tick { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .asset { color: var(--muted); font-size: 0.9rem; flex: 1 1 200px; }
+    .amt { font-weight: 600; font-variant-numeric: tabular-nums; margin-left: auto; }
+    .l2, .l3 { color: var(--muted); font-size: 0.86rem; margin-top: 5px; line-height: 1.45; }
+    .l2 b { color: var(--text); font-weight: 600; }
+    .tag { display: inline-block; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 0.75rem; margin-left: 4px; }
+    .tag.warn { border-color: var(--warn); color: var(--warn); }
+    .late { color: var(--warn); }
+    .more { display: block; margin: 16px auto; background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+    .empty { color: var(--muted); padding: 24px 8px; text-align: center; }
+    h2 { font-size: 1.1rem; margin: 20px 0 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    td.num, th.num { text-align: right; }
+    .grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    @media (min-width: 820px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 4px 14px 10px; overflow-x: auto; }
+    .prose { line-height: 1.55; font-size: 0.95rem; }
+    .prose p, .prose li { color: #e5e7eb; }
+    .prose li { margin: 4px 0; }
+    .callout { border-left: 3px solid var(--warn); background: var(--panel); padding: 10px 14px; border-radius: 0 10px 10px 0; margin: 12px 0; }
+    footer { color: var(--muted); font-size: 0.8rem; margin-top: 28px; line-height: 1.5; }
+    .d { color: var(--accent); } .r { color: var(--sell); } .i { color: var(--warn); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="./">← Hello PWA</a>
+      <h1>Congress Trades</h1>
+      <div class="meta" id="meta">Loading data…</div>
+    </header>
+
+    <nav class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-view="trades" aria-selected="true">Trades</button>
+      <button role="tab" data-view="signals" aria-selected="false">Signals</button>
+      <button role="tab" data-view="president" aria-selected="false">President</button>
+      <button role="tab" data-view="about" aria-selected="false">How it works</button>
+    </nav>
+
+    <section class="controls" id="controls">
+      <input id="q" type="search" placeholder="Search politician, ticker or asset (e.g. Pelosi, NVDA)" autocomplete="off" />
+      <div class="chips">
+        <button class="chip" data-chip="watch" aria-pressed="true">★ Watchlist</button>
+        <button class="chip" data-chip="buys" aria-pressed="false">Buys only</button>
+        <button class="chip" data-chip="securities" aria-pressed="true">Stocks &amp; options only</button>
+        <button class="chip" data-chip="house" aria-pressed="false">House</button>
+        <button class="chip" data-chip="senate" aria-pressed="false">Senate</button>
+      </div>
+      <div class="row">
+        <label>Filed in last
+          <select id="window">
+            <option value="30">30 days</option>
+            <option value="90" selected>90 days</option>
+            <option value="365">1 year</option>
+            <option value="0">all loaded</option>
+          </select>
+        </label>
+        <label>Year <select id="year"><option value="all">all</option></select></label>
+        <button class="link" id="editWatch">Edit watchlist</button>
+      </div>
+    </section>
+
+    <main id="main"></main>
+
+    <footer>
+      Source documents: House Clerk financial disclosures, Senate eFD portal, White House disclosures page. Amounts are the
+      ranges filers report, not exact values. Filings arrive up to 45 days after a trade (often later). Nothing here is
+      investment advice.
+    </footer>
+  </div>
+
+  <script>
+    const $ = (sel, el = document) => el.querySelector(sel);
+    const WATCH_KEY = "ct.watchlist";
+    const state = {
+      index: null, trades: [], president: null, view: "trades", q: "",
+      chips: { watch: true, buys: false, securities: true, house: false, senate: false },
+      window: 90, year: "all", shown: 150,
+    };
+
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const dayNum = (iso) => (iso ? Math.round(Date.parse(iso) / 864e5) : null);
+    function money(n) {
+      if (n == null) return "—";
+      if (n >= 1e6) return "$" + (n / 1e6).toFixed(n % 1e6 ? 1 : 0).replace(/\.0$/, "") + "M";
+      if (n >= 1e3) return "$" + Math.round(n / 1e3) + "K";
+      return "$" + n;
+    }
+    function range(t) {
+      if (t.min == null) return t.amount || "—";
+      if (t.max == null) return money(t.min) + "+";
+      if (t.min === t.max) return money(t.min);
+      return money(t.min) + "–" + money(t.max);
+    }
+    function who(t) {
+      const p = t.party ? `<span class="${t.party === "D" ? "d" : t.party === "R" ? "r" : "i"}">${esc(t.party)}</span>-` : "";
+      const seat = t.state ? `${p}${esc(t.state)}${t.district != null ? "-" + t.district : ""}` : "";
+      return `<b>${esc(t.name)}</b>${seat ? ` (${seat})` : ""}`;
+    }
+    function actionLabel(a) { return a === "buy" ? "BUY" : a === "sell" ? "SELL" : a === "sell_partial" ? "SELL part" : a === "exchange" ? "EXCH" : "OTHER"; }
+    function actionClass(a) { return a === "buy" ? "buy" : a && a.startsWith("sell") ? "sell" : "other"; }
+    function optionText(o) {
+      if (!o) return "";
+      const parts = [o.contracts ? `${o.contracts}×` : "", o.kind.toUpperCase(), o.strike != null ? "$" + o.strike + " strike" : "", o.expiry ? "exp " + o.expiry : ""];
+      return parts.filter(Boolean).join(" ");
+    }
+    function getWatch() {
+      try { const v = localStorage.getItem(WATCH_KEY); return (v == null ? "Pelosi" : v).split(",").map((s) => s.trim()).filter(Boolean); }
+      catch { return ["Pelosi"]; }
+    }
+    function setWatch(list) { try { localStorage.setItem(WATCH_KEY, list.join(", ")); } catch {} }
+
+    async function getJSON(path) {
+      const r = await fetch(path, { cache: "no-cache" });
+      if (!r.ok) throw new Error(`${path} → HTTP ${r.status}`);
+      return r.json();
+    }
+    function flat(f, t) {
+      let lag = f.filed && t.date ? dayNum(f.filed) - dayNum(t.date) : null;
+      if (lag != null && lag < 0) lag = null; // a filing dated before its trade is a typo in the report
+      return { ...t, chamber: f.chamber, name: f.name, party: f.party, state: f.state, district: f.district,
+        filed: f.filed, url: f.url, filing: f.id, amendment: f.amendment, lag };
+    }
+    async function load() {
+      try { state.index = await getJSON("./data/index.json"); }
+      catch (e) { renderNoData(e); return; }
+      const files = [];
+      for (const y of state.index.years || []) for (const ch of ["house", "senate"]) { const f = state.index.files?.[y]?.[ch]; if (f) files.push(f); }
+      const results = await Promise.allSettled(files.map((f) => getJSON("./data/" + f)));
+      const trades = [];
+      for (const r of results) {
+        if (r.status !== "fulfilled") { console.warn(r.reason); continue; }
+        for (const f of r.value.filings) for (const t of f.trades) trades.push(flat(f, t));
+      }
+      trades.sort((a, b) => (b.filed || "").localeCompare(a.filed || "") || (b.date || "").localeCompare(a.date || ""));
+      state.trades = trades;
+      if (state.index.president) { try { state.president = await getJSON("./data/" + state.index.president); } catch (e) { console.warn(e); } }
+      const ysel = $("#year");
+      for (const y of state.index.years || []) { const o = document.createElement("option"); o.value = y; o.textContent = y; ysel.appendChild(o); }
+      renderMeta();
+      render();
+    }
+
+    function renderMeta() {
+      const s = state.index.sources || {};
+      const bits = [];
+      for (const k of Object.keys(s).sort().reverse()) {
+        const v = s[k];
+        if (!v || typeof v !== "object" || !/^(house|senate)-\d{4}$/.test(k)) continue;
+        bits.push(v.ok ? `${k}: ${v.filings} filings (${v.scanned || 0} scans)` : `${k}: failed`);
+      }
+      const gen = state.index.generated ? new Date(state.index.generated).toLocaleString() : "unknown";
+      $("#meta").innerHTML = `Data generated ${esc(gen)} · ${esc(bits.join(" · "))} · ${state.trades.length.toLocaleString()} transactions loaded`;
+    }
+
+    function renderNoData(err) {
+      $("#meta").textContent = "No data published yet.";
+      $("#main").innerHTML = `<div class="empty">The data files are produced by the <code>Update congressional trades data</code> GitHub Action
+        (or <code>python3 scripts/fetch_trades.py</code> locally). Once <code>data/index.json</code> exists this page fills in.<br><br>
+        <small>${esc(err.message)}</small></div>`;
+    }
+
+    function filtered() {
+      const now = Date.now();
+      const win = state.window ? now - state.window * 864e5 : 0;
+      const q = state.q.trim().toLowerCase();
+      const watch = state.chips.watch ? getWatch().map((s) => s.toLowerCase()) : null;
+      return state.trades.filter((t) => {
+        if (t.status === "Deleted") return false;
+        if (state.year !== "all" && !(t.filed || "").startsWith(state.year)) return false;
+        if (win && Date.parse(t.filed || 0) < win) return false;
+        if (state.chips.house && t.chamber !== "house") return false;
+        if (state.chips.senate && t.chamber !== "senate") return false;
+        if (state.chips.buys && t.action !== "buy") return false;
+        if (state.chips.securities && t.asset_class !== "stock" && t.asset_class !== "option") return false;
+        const name = (t.name || "").toLowerCase(), tk = (t.ticker || "").toLowerCase();
+        if (q && !(name.includes(q) || tk === q || (q.length >= 2 && tk.startsWith(q)) || (t.asset || "").toLowerCase().includes(q))) return false;
+        if (watch && watch.length && !watch.some((w) => name.includes(w) || tk === w)) return false;
+        return true;
+      });
+    }
+
+    function median(arr) { if (!arr.length) return null; const a = [...arr].sort((x, y) => x - y); const m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+
+    function renderTrades(rows) {
+      const lags = rows.map((t) => t.lag).filter((l) => l != null);
+      const filings = new Set(rows.map((t) => t.filing)).size, people = new Set(rows.map((t) => t.name)).size;
+      let html = `<div class="stats">${rows.length.toLocaleString()} transactions · ${filings} filings · ${people} politician${people === 1 ? "" : "s"}`
+        + (lags.length ? ` · median lag trade→filing ${median(lags)} days` : "") + `</div>`;
+      if (!rows.length) {
+        html += `<div class="empty">Nothing matches. Turn off the ★ Watchlist chip, widen the time window, or clear the search.</div>`;
+        $("#main").innerHTML = html; return;
+      }
+      html += `<div class="cards">`;
+      for (const t of rows.slice(0, state.shown)) {
+        const opt = optionText(t.options);
+        const tags = [];
+        if (t.status === "Amended" || t.amendment) tags.push(`<span class="tag warn">amended</span>`);
+        if (t.lag != null && t.lag > 45) tags.push(`<span class="tag warn">late filing</span>`);
+        if (t.asset_class === "option") tags.push(`<span class="tag">option</span>`);
+        else if (t.asset_class !== "stock") tags.push(`<span class="tag">${esc(t.asset_code || t.asset_class)}</span>`);
+        const note = t.note && t.note.length > 160 ? t.note.slice(0, 157) + "…" : t.note;
+        html += `<article class="card">
+          <div class="l1"><span class="badge ${actionClass(t.action)}">${actionLabel(t.action)}</span>
+            <span class="tick">${esc(t.ticker || "—")}</span><span class="asset">${esc(t.asset)}</span><span class="amt">${esc(range(t))}</span></div>
+          <div class="l2">${who(t)} · ${esc(t.owner)} · ${t.chamber === "house" ? "House" : "Senate"}${tags.join("")}</div>
+          <div class="l3">Traded ${esc(t.date || "?")} · filed ${esc(t.filed || "?")}${t.lag != null ? ` <span class="${t.lag > 45 ? "late" : ""}">(${t.lag}d lag)</span>` : ""}
+            ${opt && t.asset_class === "option" ? ` · ${esc(opt)}` : ""}${t.shares && t.asset_class !== "option" ? ` · ${t.shares.toLocaleString()} shares` : ""}${note && !(opt && t.asset_class === "option") ? ` · ${esc(note)}` : ""}
+            · <a href="${esc(t.url)}" target="_blank" rel="noopener">filing ↗</a></div>
+        </article>`;
+      }
+      html += `</div>`;
+      if (rows.length > state.shown) html += `<button class="more" id="more">Show ${Math.min(150, rows.length - state.shown)} more (${(rows.length - state.shown).toLocaleString()} left)</button>`;
+      $("#main").innerHTML = html;
+      $("#more")?.addEventListener("click", () => { state.shown += 150; render(); });
+    }
+
+    function signals(rows) {
+      const byT = new Map();
+      for (const t of rows) {
+        if (!t.ticker) continue;
+        const o = byT.get(t.ticker) || { ticker: t.ticker, asset: t.asset, buys: 0, sells: 0, buyers: new Set(), sellers: new Set(), buyMin: 0, sellMin: 0 };
+        if (t.action === "buy") { o.buys++; o.buyers.add(t.name); o.buyMin += t.min || 0; }
+        else if ((t.action || "").startsWith("sell")) { o.sells++; o.sellers.add(t.name); o.sellMin += t.min || 0; }
+        byT.set(t.ticker, o);
+      }
+      const arr = [...byT.values()].map((o) => ({ ...o, buyers: o.buyers.size, sellers: o.sellers.size }));
+      const bought = arr.filter((o) => o.buys).sort((a, b) => b.buyers - a.buyers || b.buys - a.buys || b.buyMin - a.buyMin).slice(0, 15);
+      const sold = arr.filter((o) => o.sells).sort((a, b) => b.sellers - a.sellers || b.sells - a.sells || b.sellMin - a.sellMin).slice(0, 15);
+      const byP = new Map();
+      for (const t of rows) {
+        const o = byP.get(t.name) || { name: t.name, party: t.party, state: t.state, district: t.district, n: 0, buys: 0, sells: 0, min: 0 };
+        o.n++; if (t.action === "buy") o.buys++; else if ((t.action || "").startsWith("sell")) o.sells++; o.min += t.min || 0; byP.set(t.name, o);
+      }
+      const active = [...byP.values()].sort((a, b) => b.n - a.n || b.min - a.min).slice(0, 15);
+      const largest = rows.filter((t) => t.min).sort((a, b) => b.min - a.min).slice(0, 12);
+      return { bought, sold, active, largest };
+    }
+
+    function renderSignals(rows) {
+      const s = signals(rows);
+      const tickTable = (list, kind) => list.length ? `<table><thead><tr><th>Ticker</th><th class="num">${kind === "buy" ? "Buyers" : "Sellers"}</th><th class="num">Trades</th><th class="num">Σ min $</th><th class="num">Other side</th></tr></thead><tbody>` +
+        list.map((o) => `<tr><td><b>${esc(o.ticker)}</b><br><small style="color:var(--muted)">${esc(o.asset.slice(0, 40))}</small></td>
+          <td class="num">${kind === "buy" ? o.buyers : o.sellers}</td><td class="num">${kind === "buy" ? o.buys : o.sells}</td>
+          <td class="num">${money(kind === "buy" ? o.buyMin : o.sellMin)}</td><td class="num">${kind === "buy" ? o.sells + " sells" : o.buys + " buys"}</td></tr>`).join("") + `</tbody></table>`
+        : `<div class="empty">No ${kind}s in this selection.</div>`;
+      $("#main").innerHTML = `
+        <div class="stats">Aggregates over the current filters: ${rows.length.toLocaleString()} transactions. Counting distinct politicians on the same side
+          matters more than raw trade counts (one member with automatic monthly buys inflates counts).</div>
+        <div class="grid2">
+          <div><h2>Most bought (by distinct buyers)</h2><div class="panel">${tickTable(s.bought, "buy")}</div></div>
+          <div><h2>Most sold (by distinct sellers)</h2><div class="panel">${tickTable(s.sold, "sell")}</div></div>
+        </div>
+        <div class="grid2">
+          <div><h2>Most active filers</h2><div class="panel"><table><thead><tr><th>Politician</th><th class="num">Trades</th><th class="num">Buy/Sell</th><th class="num">Σ min $</th></tr></thead><tbody>
+            ${s.active.map((o) => `<tr><td>${who(o)}</td><td class="num">${o.n}</td><td class="num">${o.buys}/${o.sells}</td><td class="num">${money(o.min)}</td></tr>`).join("") || ""}
+          </tbody></table></div></div>
+          <div><h2>Largest disclosed transactions</h2><div class="panel"><table><thead><tr><th>Trade</th><th>Who</th><th class="num">Amount</th></tr></thead><tbody>
+            ${s.largest.map((t) => `<tr><td><span class="badge ${actionClass(t.action)}">${actionLabel(t.action)}</span> <b>${esc(t.ticker || t.asset.slice(0, 24))}</b><br><small style="color:var(--muted)">${esc(t.date)}${t.options ? " · " + esc(optionText(t.options)) : ""}</small></td>
+              <td>${who(t)}</td><td class="num">${esc(range(t))}</td></tr>`).join("") || ""}
+          </tbody></table></div></div>
+        </div>`;
+    }
+
+    function renderPresident() {
+      const p = state.president;
+      const list = p ? p.filings.filter((f) => f.president) : [];
+      const others = p ? p.filings.length - list.length : 0;
+      $("#main").innerHTML = `
+        <div class="prose">
+          <p>The President and Vice President file the same periodic transaction reports as Congress (OGE Form 278-T, within 30 days
+          of being notified of a trade, at most 45 days after it) with the Office of Government Ethics. The White House posts them as
+          PDFs. They are image scans without a text layer, so this page lists the filings and links to them instead of parsing the rows.</p>
+          <div class="callout"><b>What the 2025–2026 filings show (press analyses of the PDFs):</b>
+            <ul>
+              <li>Overwhelmingly bonds, not stocks: a municipal-bond portfolio of 807 positions worth $240.7M–$797.6M at the end of 2025, plus at least 243 purchases in 2026 worth $68.2M–$233.8M (<a href="https://www.cnbc.com/2026/09/29/trump-municipal-bond-portfolio.html" target="_blank" rel="noopener">CNBC, Sep 29 2026</a>).</li>
+              <li>8,940 transactions between January 2025 and June 29 2026 (5,772 purchases, 3,168 sales), filed in large batches (same CNBC analysis).</li>
+              <li>The March 2026 report held 175 transactions including corporate bonds of Nvidia, General Motors, Netflix and Boeing and small equity stakes in Bank of America and Wells Fargo (<a href="https://fortune.com/2026/04/25/trump-bond-purchases-ethics-disclosure-netflix-boeing-nvidia/" target="_blank" rel="noopener">Bloomberg via Fortune, Apr 25 2026</a>).</li>
+              <li>The annual Form 278e released June 2026 reported more than $580M of crypto-related income and a Trump Media (DJT) stake valued over $50M (<a href="https://www.cnbc.com/2026/06/30/trump-financial-disclosure-released.html" target="_blank" rel="noopener">CNBC, Jun 30 2026</a>).</li>
+              <li><a href="https://open-cabinet.org/officials/trump-donald-j" target="_blank" rel="noopener">Open Cabinet</a> hand-parses these PDFs into row-level data (31,000+ rows through July 2026) if you want the transaction detail.</li>
+            </ul>
+            The filings do not say who places the trades. Because the holdings are mostly muni and corporate bonds, there is little here to copy as an equity signal.</div>
+          <h2>Periodic transaction reports posted by the White House${p ? ` (${list.length})` : ""}</h2>
+          ${!p ? `<div class="empty">president.json not loaded yet.</div>` : `<div class="panel"><table><thead><tr><th>Date in filename</th><th>Filer</th><th>File</th></tr></thead><tbody>` +
+            list.map((f) => `<tr><td>${esc(f.date || "?")}${f.part ? ` (part ${f.part})` : ""}${f.amendment ? ` <span class="tag warn">amendment</span>` : ""}</td><td>${esc(f.filer)}</td><td><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.file)}</a></td></tr>`).join("") +
+            `</tbody></table></div>` + (others ? `<p class="stats">${others} further PTRs on the page belong to other White House officials (see <a href="${esc(p.source)}" target="_blank" rel="noopener">whitehouse.gov/disclosures</a>).</p>` : "")}
+        </div>`;
+    }
+
+    function renderAbout() {
+      const lags = state.trades.map((t) => t.lag).filter((l) => l != null);
+      const late = lags.filter((l) => l > 45).length;
+      $("#main").innerHTML = `
+        <div class="prose">
+          <h2>Where the data comes from</h2>
+          <p>The 2012 STOCK Act makes members of Congress, their spouses and dependent children report any purchase, sale or exchange
+          above $1,000 in stocks, bonds, options and similar assets on a Periodic Transaction Report within 30 days of learning about it
+          and never later than 45 days after the trade. Amounts are reported as brackets ($1,001–$15,000 up to over $50,000,000), not
+          exact values, and no share counts or prices are required. House reports are published by the Clerk, Senate reports by the
+          Secretary of the Senate's eFD portal, and executive-branch reports by the Office of Government Ethics
+          (<a href="https://www.congress.gov/crs_external_products/TE/HTML/TE10073.html" target="_blank" rel="noopener">CRS explainer</a>).</p>
+          <p>A GitHub Action runs <code>scripts/fetch_trades.py</code> daily. It downloads the Clerk's yearly filing index, converts each new
+          e-filed House PDF to text with <code>pdftotext</code> and parses the rows; walks the Senate search endpoint and parses each HTML
+          report; and lists the President's PTR PDFs. Paper filings are scanned images and appear as "scans" in the header, unparsed but
+          linked. Party and state come from the open <a href="https://github.com/unitedstates/congress-legislators" target="_blank" rel="noopener">congress-legislators</a> dataset.</p>
+          ${lags.length ? `<p>In the loaded data the median gap between a trade and its filing is <b>${median(lags)} days</b>; ${late.toLocaleString()} of ${lags.length.toLocaleString()} transactions (${(100 * late / lags.length).toFixed(1)}%) were filed after the 45-day deadline.</p>` : ""}
+          <h2>Does copying them work?</h2>
+          <ul>
+            <li>A 2025 study of 17,859 disclosure events (Jan 2020–Aug 2025) found that buying what Congress bought, on the day it became public, trailed the S&amp;P 500 by about 5 percentage points over the following year; sells also trailed. The median filing arrived 28–29 days after the trade, and even trading on the real transaction date showed no edge (<a href="https://equibles.com/research/what-happens-after-congress-buys-or-sells-a-stock-evidence-from-17-859-disclosures" target="_blank" rel="noopener">Equibles</a>).</li>
+            <li>Unusual Whales' 2025 report: of 311 disclosed portfolios, about 32% beat the S&amp;P 500's 16.6%; Democrats averaged 14.4% and Republicans 17.3%. Pelosi's portfolio was up roughly 70.9% in 2024 against 24.9% for the index (<a href="https://www.fool.com/research/congressional-stock-trading-who-trades-and-makes-the-most/" target="_blank" rel="noopener">Motley Fool summary</a>).</li>
+            <li>Academic work finds no average outperformance since the STOCK Act (<a href="https://www.sciencedirect.com/science/article/abs/pii/S0047272722000044" target="_blank" rel="noopener">Belmont et al. 2022</a>), but a November 2025 NBER paper finds members who gain leadership posts earn roughly 47 points a year more than peers afterwards, tied to committee power and corporate access (<a href="https://www.nber.org/papers/w34524" target="_blank" rel="noopener">Wei &amp; Zhou</a>).</li>
+            <li>Practical reading: the aggregate is noise; a handful of large, concentrated, option-leveraged bets by senior members (Pelosi's household is the archetype) is the only part with a track record, and you learn about them a month late.</li>
+          </ul>
+          <h2>Status of the trading ban</h2>
+          <p>The House passed a ban on new stock purchases by members, spouses and dependent children 232–198 on July 22 2026
+          (<a href="https://rollcall.com/2026/07/22/congressional-stock-trading-bill-passes-the-house/" target="_blank" rel="noopener">Roll Call</a>);
+          the Senate failed to advance it 53–47 on September 30 2026 over an attached voter-ID provision
+          (<a href="https://247wallst.com/investing/2026/10/01/the-senate-just-voted-down-a-ban-on-congressional-stock-trading/" target="_blank" rel="noopener">24/7 Wall St</a>).
+          Nancy Pelosi retires when her term ends on January 3 2027, after which her household's trades stop being disclosed
+          (<a href="https://www.cbsnews.com/news/nancy-pelosi-former-house-speaker-retire-congress/" target="_blank" rel="noopener">CBS News</a>).</p>
+          <h2>Other sources</h2>
+          <ul>
+            <li>Free, no key: this page's JSON under <code>data/</code>; the official portals linked above.</li>
+            <li>Paid APIs: Quiver Quantitative (Hobbyist tier about $30/month), Finnhub and Financial Modeling Prep (congressional endpoints need a key). Capitol Trades and Unusual Whales are websites without public APIs.</li>
+            <li>ETFs that copy disclosures: NANC (Democratic members) and GOP, formerly KRUZ (Republican members).</li>
+          </ul>
+        </div>`;
+    }
+
+    function render() {
+      const rows = filtered();
+      $("#controls").style.display = state.view === "trades" || state.view === "signals" ? "" : "none";
+      if (state.view === "trades") renderTrades(rows);
+      else if (state.view === "signals") renderSignals(rows);
+      else if (state.view === "president") renderPresident();
+      else renderAbout();
+    }
+
+    function setView(view) {
+      if (!["trades", "signals", "president", "about"].includes(view)) view = "trades";
+      state.view = view; state.shown = 150;
+      for (const x of $("#tabs").querySelectorAll("button")) x.setAttribute("aria-selected", String(x.dataset.view === view));
+      if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
+      render();
+    }
+    $("#tabs").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-view]"); if (!b) return;
+      setView(b.dataset.view);
+    });
+    window.addEventListener("hashchange", () => setView(location.hash.slice(1)));
+    if (location.hash) setView(location.hash.slice(1));
+    $("#controls").addEventListener("click", (e) => {
+      const c = e.target.closest(".chip"); if (!c) return;
+      const k = c.dataset.chip;
+      state.chips[k] = !state.chips[k];
+      if (k === "house" && state.chips.house) state.chips.senate = false;
+      if (k === "senate" && state.chips.senate) state.chips.house = false;
+      for (const x of $("#controls").querySelectorAll(".chip")) x.setAttribute("aria-pressed", String(!!state.chips[x.dataset.chip]));
+      state.shown = 150; render();
+    });
+    $("#q").addEventListener("input", (e) => { state.q = e.target.value; state.shown = 150; render(); });
+    $("#window").addEventListener("change", (e) => { state.window = Number(e.target.value); state.shown = 150; render(); });
+    $("#year").addEventListener("change", (e) => { state.year = e.target.value; state.shown = 150; render(); });
+    $("#editWatch").addEventListener("click", () => {
+      const cur = getWatch().join(", ");
+      const v = prompt("Watchlist: comma-separated name fragments or tickers (e.g. Pelosi, Khanna, Tuberville, NVDA)", cur);
+      if (v == null) return;
+      setWatch(v.split(",").map((s) => s.trim()).filter(Boolean));
+      state.chips.watch = true; $('[data-chip="watch"]').setAttribute("aria-pressed", "true");
+      render();
+    });
+    $('[data-chip="watch"]').textContent = "★ Watchlist: " + getWatch().join(", ");
+    $("#editWatch").addEventListener("click", () => { $('[data-chip="watch"]').textContent = "★ Watchlist: " + getWatch().join(", "); });
+
+    load();
+  </script>
+</body>
+</html>
