@@ -10,6 +10,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png" />
   <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
 
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Hello PWA" />
@@ -48,6 +49,8 @@
     }
     button:active { transform: scale(0.97); }
     .count { font-size: 1.1rem; color: #9ca3af; }
+    .nav { margin-top: 1rem; font-size: 1.05rem; color: #93c5fd; text-decoration: none; }
+    .nav:active { opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -55,6 +58,7 @@
   <div class="clock" id="clock">--:--:--</div>
   <button id="tap">Tap me</button>
   <div class="count" id="count">Taps: 0</div>
+  <a class="nav" href="./trades.html">📈 Congress Trades tracker →</a>
 
   <script>
     const clock = document.getElementById("clock");

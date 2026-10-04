@@ -7,6 +7,14 @@
   "orientation": "any",
   "background_color": "#1f2937",
   "theme_color": "#1f2937",
+  "shortcuts": [
+    {
+      "name": "Congress Trades",
+      "short_name": "Trades",
+      "description": "Latest stock trades disclosed by members of Congress",
+      "url": "./trades.html"
+    }
+  ],
   "icons": [
     {
       "src": "./icon-192.png",
