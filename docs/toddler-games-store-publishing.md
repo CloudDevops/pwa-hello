@@ -141,6 +141,12 @@ measured demand. Revenue expectations should stay modest until real parents have
    regenerate the two sprite sets, change the narration line "C is for Cybertruck" (for example
    "C is for Car"), and update the alphabet word list. The probe counted 15 mentions across UI text,
    narration and sprite code.
+   Status, October 4: names and code tokens are done. `tools/debrand-dino-valley.py` rewrites the
+   single-file game (15 mentions to 0, asset payloads byte-identical) and renames the rides to
+   "Silver truck" and "Red car". Because the camp sign already teaches C with its own clip, tapping the
+   silver truck now plays the existing "H is for horn" line, so no brand-bearing audio remains and no new
+   recording was needed. Still open: the silver truck sprite is a Cybertruck-shaped render and needs new
+   artwork from the image tool on the Mac (frame 0 of the sprites atlas; the red car is a generic crossover).
 2. **Re-voice the 41 narration clips with a commercially licensed voice.** The current clips were
    produced with edge-tts, which has no commercial output rights. Options:
    Azure AI Speech on the paid Standard tier (the paid tier grants commercial use of prebuilt neural
