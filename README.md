@@ -84,3 +84,7 @@ Then enable Pages:
 ## Iterating
 
 Edit files locally → `git commit && git push` → GitHub Pages re-deploys in ~30-60s. On the iPad, force-quit the installed app and re-launch to pick up changes (or pull-to-refresh inside it).
+
+## Related
+
+- [Toddler games: store publishing and monetization plan](docs/toddler-games-store-publishing.md) (research dated October 4, 2026). This repo is the install-on-iPad rehearsal that plan builds on.
