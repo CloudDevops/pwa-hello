@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI for Small Business — NikTech AI</title>
+<meta name="description" content="AI that answers your phone, books appointments and handles the busywork — for salons, shops and clinics across the Inland Empire, Orange County and LA.">
+<link rel="canonical" href="https://niktechai.com/smb/">
+<link rel="alternate" type="application/rss+xml" title="NikTech AI — Engineering notes" href="/feed.xml">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://niktechai.com/smb/">
+<meta property="og:title" content="AI for Small Business — NikTech AI">
+<meta property="og:description" content="Enterprise-grade AI, small-business sized. Phone answering, appointment booking and custom automation across Southern California.">
+<meta property="og:site_name" content="NikTech AI">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B0F1A'/><path d='M26 74V26h9l30 33V26h9v48h-9L35 41v33z' fill='%234DE1C1'/></svg>">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://niktechai.com/smb/#service",
+      "name": "AI services for small business",
+      "serviceType": "AI phone answering, appointment booking, and small-business automation",
+      "provider": { "@id": "https://niktechai.com/#org" },
+      "url": "https://niktechai.com/smb/",
+      "areaServed": [
+        { "@type": "AdministrativeArea", "name": "Inland Empire, California" },
+        { "@type": "AdministrativeArea", "name": "Orange County, California" },
+        { "@type": "AdministrativeArea", "name": "Greater Los Angeles, California" },
+        { "@type": "AdministrativeArea", "name": "San Diego County, California" }
+      ],
+      "audience": { "@type": "BusinessAudience", "audienceType": "Salons, barbershops, med spas, auto repair, dental and other appointment-based local businesses" },
+      "offers": [
+        { "@type": "Offer", "name": "AI Audit", "price": "750", "priceCurrency": "USD",
+          "description": "90-minute review plus a written findings document — where AI saves you money, what it costs, what to ignore. Credited against your first build." },
+        { "@type": "Offer", "name": "AI Front Desk — Standard", "priceCurrency": "USD",
+          "priceSpecification": { "@type": "UnitPriceSpecification", "price": "349", "priceCurrency": "USD", "unitCode": "MON" },
+          "description": "AI phone answering that knows your hours, services and prices, books into your calendar and texts you a summary of every call." }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://niktechai.com/smb/#faq",
+      "mainEntity": [
+        { "@type": "Question", "name": "How much does an AI receptionist cost for a small business?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Between $199 and $599 per month depending on whether it just takes messages or books appointments, plus a one-time setup fee of $495 to $1,995. For comparison, a part-time receptionist costs upwards of $2,500 a month loaded, and a traditional answering service runs $150 to $400 and only takes messages." } },
+        { "@type": "Question", "name": "Do I have to change my phone number?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. You keep your number and forward calls that go unanswered, or calls after hours, to a line I set up. Nothing about your published number changes, and you can switch the forwarding off yourself from your phone at any time." } },
+        { "@type": "Question", "name": "Will callers know they are talking to an AI?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, and by design. The assistant identifies itself at the start of the call. California requires bot disclosure in this context, and beyond the law, a caller who works out they were deceived becomes a bad review. It answers only when you do not — your phone always rings first." } },
+        { "@type": "Question", "name": "What happens if the AI cannot handle a call?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It forwards the caller to your cell phone. Silence on a business line is the one failure that cannot be recovered, so the system is built to hand off to a human rather than fail quietly. You also get a text summary of every call within moments of it ending." } },
+        { "@type": "Question", "name": "Which booking systems does it work with?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Google Calendar, Square Appointments, and most common booking tools used by salons and clinics. If yours has an API, it can be wired in; if it does not, the assistant takes the booking details and texts them to you." } },
+        { "@type": "Question", "name": "Who builds it?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Nikhil Harinath, based in Corona, California. Fifteen-plus years in IT and ten in cloud engineering, currently building production AI agents for enterprise clients through Microsoft, previously in a FedRAMP High environment at Cisco. The same engineering, sized for a small business." } }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+:root{
+  --bg:#FBF8F3; --bg-2:#FFFFFF; --ink:#12151C; --ink-2:#414A5C;
+  --accent:#0A6E62; --accent-2:#B4531A; --line:#E6DFD2; --glow:rgba(10,110,98,.10);
+}
+:root[data-theme="dark"]{
+  --bg:#0B0F1A; --bg-2:#121828; --ink:#F2F5FA; --ink-2:#9FB0C9;
+  --accent:#4DE1C1; --accent-2:#FFB067; --line:#222C42; --glow:rgba(77,225,193,.14);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0F1A; --bg-2:#121828; --ink:#F2F5FA; --ink-2:#9FB0C9;
+    --accent:#4DE1C1; --accent-2:#FFB067; --line:#222C42; --glow:rgba(77,225,193,.14);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 ui-sans-serif,-apple-system,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:0 24px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+header{padding:26px 0;border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:-.02em;font-size:1.06rem;color:var(--ink)}
+.logo:hover{text-decoration:none}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--bg);
+  display:grid;place-items:center;font-weight:800;font-size:.86rem}
+:root[data-theme="dark"] .mark{background:var(--accent);color:#06231F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mark{background:var(--accent);color:#06231F}}
+nav{display:flex;gap:20px;align-items:center;font-size:.93rem}
+nav a{color:var(--ink-2)}
+nav .hide-sm{display:inline}
+@media (max-width:640px){nav .hide-sm{display:none}}
+#tt{background:none;border:1px solid var(--line);color:var(--ink-2);border-radius:8px;
+  width:34px;height:34px;cursor:pointer;font-size:.95rem;line-height:1}
+#tt:hover{border-color:var(--accent);color:var(--accent)}
+
+.hero{padding:74px 0 54px}
+.kicker{display:inline-block;font-size:.78rem;font-weight:650;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:5px 13px;margin-bottom:26px}
+h1{font-size:clamp(2.15rem,5.6vw,3.5rem);line-height:1.05;letter-spacing:-.033em;margin:0 0 20px;font-weight:800}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:clamp(1.05rem,2.1vw,1.24rem);color:var(--ink-2);max-width:64ch;margin:0 0 30px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-block;padding:12px 22px;border-radius:10px;font-weight:620;font-size:.96rem;
+  border:0;cursor:pointer;font-family:inherit}
+.btn.p{background:var(--accent);color:var(--bg)}
+:root[data-theme="dark"] .btn.p{color:#06231F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.p{color:#06231F}}
+.btn.p:hover{text-decoration:none;filter:brightness(1.08)}
+.btn.s{border:1px solid var(--line);color:var(--ink);background:none}
+.btn.s:hover{text-decoration:none;border-color:var(--accent);color:var(--accent)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.stat{background:var(--bg-2);padding:20px 18px}
+.stat b{display:block;font-size:1.5rem;letter-spacing:-.02em;color:var(--accent)}
+.stat span{font-size:.845rem;color:var(--ink-2)}
+
+section{padding:56px 0;border-top:1px solid var(--line)}
+h2{font-size:1.62rem;letter-spacing:-.022em;margin:0 0 10px;font-weight:750}
+.sub{color:var(--ink-2);margin:0 0 30px;max-width:64ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:18px}
+.card{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:24px;
+  transition:border-color .18s,transform .18s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card h3{margin:0 0 9px;font-size:1.07rem;font-weight:700}
+.card p{margin:0;color:var(--ink-2);font-size:.945rem}
+.num{font-size:.74rem;font-weight:700;letter-spacing:.09em;color:var(--accent-2);display:block;margin-bottom:9px}
+
+.work{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+.work li{background:var(--bg-2);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 12px 12px 0;padding:19px 22px}
+.work h3{margin:0 0 5px;font-size:1.02rem;font-weight:680}
+.work p{margin:0;color:var(--ink-2);font-size:.93rem}
+.work .meta{font-size:.79rem;color:var(--accent-2);font-weight:620;letter-spacing:.03em;margin-bottom:6px}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.tag{font-size:.79rem;padding:4px 11px;border-radius:999px;background:var(--glow);color:var(--accent);font-weight:560}
+
+/* --- pricing tiers --- */
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:18px;align-items:start}
+.tier{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:24px;position:relative}
+.tier.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tier .badge{position:absolute;top:-11px;left:22px;background:var(--accent);color:var(--bg);
+  font-size:.7rem;font-weight:750;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+:root[data-theme="dark"] .tier .badge{color:#06231F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tier .badge{color:#06231F}}
+.tier h3{margin:0 0 4px;font-size:1.05rem;font-weight:720}
+.tier .who{font-size:.85rem;color:var(--ink-2);margin:0 0 16px}
+.tier .price{font-size:1.85rem;font-weight:800;letter-spacing:-.03em;color:var(--accent);line-height:1.1}
+.tier .price small{font-size:.85rem;font-weight:600;color:var(--ink-2);letter-spacing:0}
+.tier .setup{font-size:.83rem;color:var(--ink-2);margin:4px 0 0}
+.tier ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:7px;font-size:.9rem;color:var(--ink-2)}
+.tier li::before{content:"✓";color:var(--accent);font-weight:800;margin-right:8px}
+.tier li.no{opacity:.45}
+.tier li.no::before{content:"–";color:var(--ink-2);font-weight:700}
+
+/* --- FAQ --- */
+.faq details{border-bottom:1px solid var(--line);padding:15px 0}
+.faq details:first-of-type{border-top:1px solid var(--line)}
+.faq summary{cursor:pointer;font-weight:660;font-size:1rem;list-style:none;display:flex;
+  justify-content:space-between;gap:16px;align-items:baseline}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--accent);font-weight:800;font-size:1.15rem}
+.faq details[open] summary::after{content:"–"}
+.faq details p{color:var(--ink-2);margin:11px 0 0;font-size:.95rem;max-width:70ch}
+
+/* --- contact --- */
+.cbox{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:32px}
+.split{display:grid;grid-template-columns:1.25fr 1fr;gap:30px}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+form{display:grid;gap:13px}
+label{display:block;font-size:.83rem;font-weight:620;color:var(--ink-2);margin-bottom:5px}
+input,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;
+  background:var(--bg);color:var(--ink);font:inherit;font-size:.94rem}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+textarea{min-height:118px;resize:vertical}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.err{border-color:var(--accent-2)!important}
+#msg{font-size:.9rem;padding:11px 14px;border-radius:9px;display:none}
+#msg.ok{display:block;background:var(--glow);color:var(--accent);border:1px solid var(--accent)}
+#msg.bad{display:block;background:rgba(180,83,26,.10);color:var(--accent-2);border:1px solid var(--accent-2)}
+.rows{display:grid;gap:10px;margin-top:16px}
+.row{display:flex;gap:11px;align-items:baseline;font-size:.95rem;flex-wrap:wrap}
+.row span{color:var(--ink-2);min-width:76px;font-size:.85rem}
+.bookbox{background:var(--glow);border:1px solid var(--accent);border-radius:13px;padding:22px;margin-bottom:18px}
+.bookbox h3{margin:0 0 6px;font-size:1.05rem;font-weight:720}
+.bookbox p{margin:0 0 14px;font-size:.91rem;color:var(--ink-2)}
+.demo{background:var(--glow);border:1px solid var(--accent);border-radius:14px;padding:26px;margin:30px 0 0;text-align:center}
+.demo h3{margin:0 0 6px;font-size:1.12rem;font-weight:740}
+.demo p{margin:0 0 16px;color:var(--ink-2);font-size:.95rem}
+.demo .tel{display:inline-block;font-size:1.7rem;font-weight:800;letter-spacing:-.02em;color:var(--accent)}
+.note{font-size:.86rem;color:var(--ink-2);margin-top:14px}
+footer{padding:34px 0 52px;color:var(--ink-2);font-size:.86rem;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap bar">
+  <a class="logo" href="/"><span class="mark">N</span> NikTech AI</a>
+  <nav>
+    <a class="hide-sm" href="#what">What I build</a>
+    <a class="hide-sm" href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contact">Contact</a>
+    <button id="tt" title="Toggle theme" aria-label="Toggle theme">◐</button>
+  </nav>
+</div></header>
+
+<main>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="kicker">AI for Small Business</span>
+    <h1>Your phone rang while you were <em>with a customer.</em></h1>
+    <p class="lede">That call was a booking, and it went to the next shop down the street. I build
+      AI that picks up when you can't — it knows your hours, your services and your prices, books
+      people in, and texts you a summary before they've left the parking lot.</p>
+    <div class="cta">
+      <a class="btn p" href="#pricing">See what it costs</a>
+      <a class="btn s" href="#contact">Talk to me</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>15+ yrs</b><span>IT &amp; engineering</span></div>
+    <div class="stat"><b>Enterprise</b><span>AI built for Microsoft's clients</span></div>
+    <div class="stat"><b>Local</b><span>Corona, CA — in person or remote</span></div>
+    <div class="stat"><b>From $199</b><span>Per month, cancel anytime</span></div>
+  </div>
+
+  <div class="demo">
+    <h3>Don't take my word for it — call it</h3>
+    <p>Ring the demo line and ask it something a customer would ask. Thirty seconds, no form.</p>
+    <a class="tel" href="tel:{{DEMO_NUMBER_E164}}">{{DEMO_NUMBER}}</a>
+  </div>
+
+  <section id="what">
+    <h2>What I build for small businesses</h2>
+    <p class="sub">Three things. The first one is what most people call about, and it's the one that
+      pays for itself fastest.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="num">01</span>
+        <h3>AI Front Desk</h3>
+        <p>Answers the calls you can't. Hours, prices, directions, services — and it books the
+          appointment straight into your calendar. Every call arrives on your phone as a text
+          summary. <a href="/ai-front-desk/">How it works →</a></p>
+      </div>
+      <div class="card">
+        <span class="num">02</span>
+        <h3>The busywork, automated</h3>
+        <p>Review requests after every visit, appointment reminders that cut no-shows, quotes and
+          intake forms that fill themselves in, the weekly report you build by hand. Small things,
+          every week, forever.</p>
+      </div>
+      <div class="card">
+        <span class="num">03</span>
+        <h3>Custom software, built fast</h3>
+        <p>The tool your business needs and nobody sells — booking, scheduling, inventory, a
+          customer portal. Fixed scope, fixed price, and you own the code when it's done.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <h2>Why me and not a national vendor</h2>
+    <p class="sub">The AI answering services advertising to you right now are call centres with a
+      chatbot bolted on, sold by a salesperson who has never configured one.</p>
+    <ul class="work">
+      <li>
+        <div class="meta">THE ENGINEERING IS THE SAME</div>
+        <h3>I build this for large companies during the week</h3>
+        <p>Production AI agents for enterprise clients through Microsoft, and before that cloud
+          infrastructure inside a FedRAMP High environment at Cisco. The system answering your phone
+          is built to the same standard — it just has a smaller bill attached.</p>
+      </li>
+      <li>
+        <div class="meta">YOU TALK TO THE PERSON WHO BUILT IT</div>
+        <h3>No account manager, no ticket queue</h3>
+        <p>When something needs changing, you text the engineer. Not a support portal, not a
+          rep who has to escalate it.</p>
+      </li>
+      <li>
+        <div class="meta">LOCAL, AND ACTUALLY LOCAL</div>
+        <h3>Corona, California</h3>
+        <p>In person across the Inland Empire, Orange County, the LA metro and San Diego. Remote
+          anywhere else. I'd rather set your system up sitting in your shop than over a screen share.</p>
+      </li>
+      <li>
+        <div class="meta">IT'S YOURS</div>
+        <h3>Your number, your data, your code</h3>
+        <p>You keep your phone number — calls forward, and you can switch that off yourself in one
+          setting. Custom builds are handed over with the source code and the accounts in your name.
+          Nothing here is designed to trap you.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="pricing">
+    <h2>What it costs</h2>
+    <p class="sub">Published, because you shouldn't have to sit through a sales call to find out.
+      Month to month — cancel whenever, no contract to escape.</p>
+
+    <div class="tiers">
+      <div class="tier">
+        <h3>Starter</h3>
+        <p class="who">Stop losing calls to voicemail.</p>
+        <div class="price">$199<small>/mo</small></div>
+        <p class="setup">+ $495 one-time setup</p>
+        <ul>
+          <li>Answers every call you miss</li>
+          <li>Takes the message properly</li>
+          <li>Texts you a summary instantly</li>
+          <li class="no">Answers questions</li>
+          <li class="no">Books appointments</li>
+        </ul>
+      </div>
+      <div class="tier best">
+        <span class="badge">Most shops pick this</span>
+        <h3>Standard</h3>
+        <p class="who">It answers, and it books.</p>
+        <div class="price">$349<small>/mo</small></div>
+        <p class="setup">+ $995 one-time setup</p>
+        <ul>
+          <li>Everything in Starter</li>
+          <li>Knows your hours, services and prices</li>
+          <li>Books into your calendar</li>
+          <li>After-hours and overflow</li>
+          <li>Hands off to your cell when it should</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h3>Pro</h3>
+        <p class="who">In your own voice, in two languages.</p>
+        <div class="price">$599<small>/mo</small></div>
+        <p class="setup">+ $1,995 one-time setup</p>
+        <ul>
+          <li>Everything in Standard</li>
+          <li>Your voice, cloned</li>
+          <li>English and Spanish</li>
+          <li>Monthly call-insights report</li>
+          <li>Priority changes</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note">Includes up to 500 minutes a month; beyond that it's billed at cost. A part-time
+      receptionist runs $2,500+ a month loaded. An answering service is $150–400 and only takes
+      messages.</p>
+
+    <h2 style="margin-top:46px">Not sure AI is even the answer?</h2>
+    <p class="sub">Then don't buy a subscription yet. Buy an hour and a half of an engineer.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="num">AI AUDIT · $750</span>
+        <h3>Ninety minutes, then a straight answer in writing</h3>
+        <p>I sit down with you, look at how the business actually runs, and send you a written
+          document: where AI would genuinely save you money, roughly what each thing costs, what to
+          ignore entirely, and what to do first. Vendor-neutral — including "don't buy anything from
+          me." The $750 comes off the first thing you hire me to build.</p>
+      </div>
+      <div class="card">
+        <span class="num">CUSTOM BUILD · FROM $3,000</span>
+        <h3>The tool nobody sells you</h3>
+        <p>Fixed scope, fixed price, agreed in writing before anything starts. Source code and
+          accounts handed over at delivery — you own it outright. Thirty-day warranty, then an
+          optional care plan if you'd rather I kept an eye on it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2>Questions I get asked</h2>
+    <div class="faq">
+      <details>
+        <summary>Do I have to change my phone number?</summary>
+        <p>No. You keep your number. Calls that go unanswered — or all calls after hours, your
+          choice — forward to a line I set up. Your phone always rings first. And because it's just
+          call forwarding, you can turn the whole thing off yourself from your phone in one setting.</p>
+      </details>
+      <details>
+        <summary>Will my customers know it's an AI?</summary>
+        <p>Yes, and that's deliberate. The assistant says what it is at the start of the call.
+          California requires that disclosure, and separately it's just good business — a caller who
+          works out they were tricked into thinking they had a person leaves a bad review. In
+          practice people don't mind. They mind voicemail.</p>
+      </details>
+      <details>
+        <summary>What if it can't handle something?</summary>
+        <p>It forwards the caller to your cell. A business phone line going quiet is the one failure
+          you can't recover from, so it's built to hand off to a human rather than fail silently.
+          You also get a text summary of every single call, so you'll spot anything odd within
+          minutes rather than at the end of the week.</p>
+      </details>
+      <details>
+        <summary>Does it work with my booking system?</summary>
+        <p>Google Calendar, Square Appointments and most of the common salon and clinic tools, yes.
+          If yours has an API it can be wired in. If it doesn't, the assistant collects the booking
+          details and texts them to you — still faster than listening to voicemails at closing time.</p>
+      </details>
+      <details>
+        <summary>How long does setup take?</summary>
+        <p>About a week from the day you say go. I need one form from you — hours, services, prices,
+          the questions customers ask most — and then roughly ten minutes of your time on the phone
+          to switch the forwarding on.</p>
+      </details>
+      <details>
+        <summary>What happens to my customers' information?</summary>
+        <p>Call transcripts are encrypted, kept for a fixed window and then deleted. Nothing is used
+          to train anything. It's written into the agreement, not just promised here.</p>
+      </details>
+      <details>
+        <summary>What if I want to cancel?</summary>
+        <p>Cancel any month. You turn the forwarding off and your phone behaves exactly as it did
+          before. There's no contract term to escape and nothing of yours is held hostage.</p>
+      </details>
+      <details>
+        <summary>Are you going to still be here in a year?</summary>
+        <p>Fair question to ask a one-person business. I run this alongside a long-running enterprise
+          engineering contract — that's not going away, and it's the reason I can build this
+          properly rather than cheaply. You get a written agreement, and for custom work you own the
+          code regardless.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2>Let's talk</h2>
+    <p class="sub">Corona, California — in person across the <b>Inland Empire</b>,
+      <b>Orange County</b>, the <b>Greater Los Angeles</b> metro and <b>San Diego</b>. Remote
+      anywhere in the US. Evenings and weekends are usually easiest.</p>
+
+    <div class="cbox">
+      <div class="split">
+        <div>
+          <form id="cf" novalidate>
+            <div>
+              <label for="n">Your name</label>
+              <input id="n" name="name" autocomplete="name" required>
+            </div>
+            <div>
+              <label for="e">Email</label>
+              <input id="e" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div>
+              <label for="o">Business name <span style="font-weight:400">(optional)</span></label>
+              <input id="o" name="org" autocomplete="organization">
+            </div>
+            <div>
+              <label for="m">What's the thing that keeps costing you time or money?</label>
+              <textarea id="m" name="message" required></textarea>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="w">Leave this empty</label>
+              <input id="w" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <div id="msg" role="status" aria-live="polite"></div>
+            <div><button class="btn p" type="submit" id="sb">Send message</button></div>
+          </form>
+        </div>
+
+        <div>
+          <div class="bookbox">
+            <h3>Rather just call it?</h3>
+            <p>Ring the demo line and ask it whatever a customer would ask. No form, no pitch.</p>
+            <a class="btn p" href="tel:{{DEMO_NUMBER_E164}}">{{DEMO_NUMBER}}</a>
+          </div>
+          <div class="rows">
+            <div class="row"><span>Email</span> <a href="mailto:hello@niktechai.com">hello@niktechai.com</a></div>
+            <div class="row"><span>Based in</span> Corona, California</div>
+            <div class="row"><span>In person</span> Inland Empire · Orange County · LA metro · San Diego</div>
+            <div class="row"><span>Remote</span> Nationwide</div>
+            <div class="row"><span>Hours</span> Evenings &amp; weekends for calls</div>
+          </div>
+          <p class="note">Work at a larger company? The <a href="/">enterprise side</a> is over here.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer><div class="wrap">
+  © <span id="y">2026</span> NikTech AI · Nikhil “Nick” Harinath ·
+  <a href="/">Enterprise</a> · <a href="/ai-front-desk/">AI Front Desk</a> ·
+  <a href="/blog/">Engineering notes</a>
+</div></footer>
+
+<script>
+(function(){
+  var r=document.documentElement,k='ntai-theme',s=localStorage.getItem(k);
+  if(s)r.setAttribute('data-theme',s);
+  document.getElementById('tt').addEventListener('click',function(){
+    var c=r.getAttribute('data-theme');
+    if(!c)c=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+    var n=c==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem(k,n);
+  });
+  document.getElementById('y').textContent=new Date().getFullYear();
+
+  var f=document.getElementById('cf'),msg=document.getElementById('msg'),sb=document.getElementById('sb');
+  function show(cls,text){msg.className=cls;msg.textContent=text}
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();
+    ['n','e','m'].forEach(function(i){document.getElementById(i).classList.remove('err')});
+    var data=Object.fromEntries(new FormData(f));
+    sb.disabled=true;var old=sb.textContent;sb.textContent='Sending…';
+    fetch('/api/contact',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify(data)})
+      .then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})})
+      .then(function(res){
+        if(res.j.ok){
+          f.reset();
+          show('ok','Got it — thanks. I read everything myself and usually reply the same evening.');
+        }else{
+          (res.j.fields||[]).forEach(function(fl){
+            var el={name:'n',email:'e',message:'m'}[fl]; if(el)document.getElementById(el).classList.add('err');
+          });
+          show('bad',res.j.error||'Something went wrong. Email hello@niktechai.com directly.');
+        }
+      })
+      .catch(function(){show('bad','Network error. Email hello@niktechai.com directly.')})
+      .finally(function(){sb.disabled=false;sb.textContent=old});
+  });
+})();
+</script>
+</body>
+</html>
