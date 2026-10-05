@@ -204,7 +204,7 @@
         bits.push(v.ok ? `${k}: ${v.filings} filings (${v.scanned || 0} scans)` : `${k}: failed`);
       }
       const gen = state.index.generated ? new Date(state.index.generated).toLocaleString() : "unknown";
-      $("#meta").innerHTML = `Data generated ${esc(gen)} · ${esc(bits.join(" · "))} · ${state.trades.length.toLocaleString()} transactions loaded`;
+      $("#meta").innerHTML = `Sources checked ${esc(gen)} · ${esc(bits.join(" · "))} · ${state.trades.length.toLocaleString()} transactions loaded`;
     }
 
     function renderNoData(err) {

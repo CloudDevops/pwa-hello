@@ -419,8 +419,7 @@ def update_house(year: int, out_dir: str, cache: Cache, house_lookup, limit: int
         "source": HOUSE_ZIP.format(year=year),
         "filings": sorted(filings.values(), key=lambda f: (f["filed"] or "", f["id"]), reverse=True),
     }
-    save_json(path, data)
-    return summarize(data)
+    return summarize(save_if_changed(path, data, existing))
 
 
 # --------------------------------------------------------------------------------- Senate
@@ -559,8 +558,7 @@ def update_senate(year: int, out_dir: str, cache: Cache, senate_lookup, client: 
         "source": f"{SENATE}/search/",
         "filings": sorted(filings.values(), key=lambda f: (f["filed"] or "", f["id"]), reverse=True),
     }
-    save_json(path, data)
-    return summarize(data)
+    return summarize(save_if_changed(path, data, existing))
 
 
 # ------------------------------------------------------------------------------ President
@@ -605,7 +603,7 @@ def update_president(out_dir: str) -> dict:
         "note": "OGE Form 278-T PTRs published by the White House are image scans; transactions are not machine-parsed here.",
         "filings": filings,
     }
-    save_json(path, data)
+    filings = save_if_changed(path, data, load_json(path))["filings"]
     return {"filings": len(filings), "president_filings": sum(1 for f in filings if f["president"]), "ok": True}
 
 
@@ -618,6 +616,18 @@ def now_iso() -> str:
 def compact(d: dict) -> dict:
     """Drop None/False/empty values so the JSON stays small."""
     return {k: v for k, v in d.items() if v not in (None, False, "", [], {})}
+
+
+def save_if_changed(path: str, data: dict, existing: dict | None) -> dict:
+    """Write the file only when its filings differ from what is already on disk.
+
+    The per-file `generated` stamp would otherwise change on every run and make the daily
+    workflow commit multi-megabyte files that carry no new information. index.json still
+    records when the sources were last checked."""
+    if existing and existing.get("filings") == data.get("filings"):
+        return existing
+    save_json(path, data)
+    return data
 
 
 def load_json(path: str):
